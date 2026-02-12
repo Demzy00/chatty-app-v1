@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use("/api/auth", authRouter);
 app.use("/api/messages", messageRouter);
+app.use("/api/messages", messageRouter);
 
 // make ready for deployment
 if (process.env.NODE_ENV === "production") {
