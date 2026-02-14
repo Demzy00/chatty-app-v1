@@ -38,8 +38,15 @@ export const signup = async (req, res) => {
     });
 
     if (newUser) {
-      generateToken(newUser._id, res); // Generate token for the new user (implementation not shown)
-      await newUser.save();
+      // before code review
+      // generateToken(newUser._id, res); // Generate token for the new user (implementation not shown)
+      // await newUser.save();
+
+
+      // after code review
+      // Persist user first, then issue with cookie
+      const savedUser = await newUser.save();
+      generateToken(savedUser._id, res); // Generate token for the saved user
 
       res.status(201).json({
         message: "User registered successfully",
@@ -51,7 +58,7 @@ export const signup = async (req, res) => {
         },
       });
 
-      // send a welcome email to the user 
+      // send a welcome email to the user
     } else {
       return res.status(500).json({ message: "Invalid user data" });
     }
