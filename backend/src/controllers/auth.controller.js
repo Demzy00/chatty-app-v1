@@ -44,7 +44,6 @@ export const signup = async (req, res) => {
       // generateToken(newUser._id, res); // Generate token for the new user (implementation not shown)
       // await newUser.save();
 
-
       // after code review
       // Persist user first, then issue with cookie
       const savedUser = await newUser.save();
@@ -63,13 +62,15 @@ export const signup = async (req, res) => {
       // send a welcome email to the user
 
       try {
-        await sendWelcomeEmail(savedUser.email, savedUser.fullName, ENV.CLIENT_URL);
-      }catch (error) {
+        await sendWelcomeEmail(
+          savedUser.email,
+          savedUser.fullName,
+          ENV.CLIENT_URL,
+        );
+      } catch (error) {
         console.error("Failed to send welcome email:", error);
         // Don't fail the signup process if email sending fails, but log the error
       }
-
-
     } else {
       return res.status(500).json({ message: "Invalid user data" });
     }
@@ -77,4 +78,47 @@ export const signup = async (req, res) => {
     console.error("Signup error:", error);
     return res.status(500).json({ message: "Server error during signup" });
   }
+};
+
+export const login = async (req, res) => {
+  // Implement login logic here
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
+
+    if (!isMatch)
+      return res.status(400).json({ message: "Invalid credentials" });
+
+    generateToken(user._id, res); // Generate token for the logged-in user
+
+    res.status(200).json({
+      message: "Login successful",
+      user: {
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        profilePic: user.profilePic,
+      },
+    });
+
+    // Basic validation
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
+    }
+  } catch (error) {
+    console.error("Login error:", error);
+    return res.status(500).json({ message: "Server error during login" });
+  }
+};
+
+export const logout = async (_, res) => {
+  res.clearCookie("jwt", "", { maxAge: 0 });
+  res.status(200).json({ message: "Logged out successfully" });
 };
