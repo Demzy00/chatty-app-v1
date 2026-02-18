@@ -3,6 +3,7 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import { sendWelcomeEmail } from "../emails/emailHandlers.js";
 import { ENV } from "../lib/env.js";
+import cloudinary from "../lib/cloudinary.js";
 
 export const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -121,4 +122,53 @@ export const login = async (req, res) => {
 export const logout = async (_, res) => {
   res.clearCookie("jwt", "", { maxAge: 0 });
   res.status(200).json({ message: "Logged out successfully" });
+};
+
+export const updateProfile = async (req, res) => {
+  // Implement profile update logic here
+  try {
+    const { profilePic } = req.body;
+
+    if (!profilePic) {
+      return res.status(400).json({ message: "Profile picture is required" });
+    }
+
+    const userId = req.user._id;
+
+    const uploadedResponse = await cloudinary.uploader.upload(profilePic, {
+      folder: "chatty_app/profile_pics",
+      public_id: `profile_${userId}`,
+      overwrite: true,
+    });
+
+    const updateUser = await User.findByIdAndUpdate(
+      userId,
+      { profilePic: uploadedResponse.secure_url },
+      { new: true },
+    );
+
+    res.status(200).json(updateUser);
+
+    // const user = await User.findById(req.user._id);
+
+    // if (!user) {
+    //   return res.status(404).json({ message: "User not found" });
+    // }
+
+    // user.profilePic = profilePic;
+    // await user.save();
+
+    // res.status(200).json({
+    //   message: "Profile updated successfully",
+    //   user: {
+    //     _id: user._id,
+    //     fullName: user.fullName,
+    //     email: user.email,
+    //     profilePic: user.profilePic,
+    //   },
+    // });
+  } catch (error) {
+    console.log("Error in update profile:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
