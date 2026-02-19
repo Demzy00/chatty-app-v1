@@ -10,7 +10,7 @@ import { arcjetProtection } from "../middleware/arcjet.middleware.js";
 
 const router = express.Router();
 
-router.use(arcjetProtection); // Apply Arcjet protection to all auth routes
+// router.use(arcjetProtection); // Apply Arcjet protection to all auth routes
 
 router.post("/signup", signup);
 router.post("/login", login);
