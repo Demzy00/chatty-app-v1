@@ -6,15 +6,18 @@ import {
   updateProfile,
 } from "../controllers/auth.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
+import { arcjetProtection } from "../middleware/arcjet.middleware.js";
 
 const router = express.Router();
+
+router.use(arcjetProtection); // Apply Arcjet protection to all auth routes
 
 router.post("/signup", signup);
 router.post("/login", login);
 router.post("/logout", logout);
-
 router.post("/update-profile", protectRoute, updateProfile);
-
-router.get("/check",protectRoute, (req,res) => res.status(200).json({message: "User is authenticated", user: req.user}));
+router.get("/check", protectRoute, (req, res) =>
+  res.status(200).json({ message: "User is authenticated", user: req.user }),
+);
 
 export default router;
