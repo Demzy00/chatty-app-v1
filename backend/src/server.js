@@ -18,7 +18,6 @@ app.use(cookieParser()); // Middleware to parse cookies
 
 app.use("/api/auth", authRouter);
 app.use("/api/messages", messageRouter);
-app.use("/api/messages", messageRouter);
 
 // make ready for deployment
 if (ENV.NODE_ENV === "production") {
