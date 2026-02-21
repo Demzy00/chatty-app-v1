@@ -1,10 +1,11 @@
 import express from "express";
-import cookieParser from "cookie-parser"; 
+import cookieParser from "cookie-parser";
 import path from "path";
 import { ENV } from "./lib/env.js";
 import authRouter from "./routes/auth.route.js";
 import messageRouter from "./routes/message.route.js";
 import { connectDB } from "./lib/db.js";
+import cors from "cors";
 
 const app = express();
 const __dirname = path.resolve();
@@ -12,9 +13,8 @@ const __dirname = path.resolve();
 const PORT = ENV.PORT;
 
 app.use(express.json()); // Middleware to parse JSON bodies
-app.use(cookieParser()); // Middleware to parse cookies 
-
-
+app.use(cors({ origin: ENV.CLIENT_URL, credentials: true })); // Enable CORS with credentials
+app.use(cookieParser()); // Middleware to parse cookies
 
 app.use("/api/auth", authRouter);
 app.use("/api/messages", messageRouter);
