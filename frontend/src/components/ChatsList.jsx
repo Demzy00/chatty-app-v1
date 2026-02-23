@@ -1,49 +1,47 @@
-import React, { useEffect } from "react";
-import { useAuthStore } from "../store/useAuthStore";
+import { useEffect } from "react";
 import { useChatStore } from "../store/useChatStore";
 import UsersLoadingSkeleton from "./UsersLoadingSkeleton";
 import NoChatsFound from "./NoChatsFound";
+import { useAuthStore } from "../store/useAuthStore";
 
-const ContactList = () => {
-  const { getAllContacts, allContacts, isUsersLoading, setSelectedUser } =
+function ChatsList() {
+  const { getMyChatPartners, chats, isUsersLoading, setSelectedUser } =
     useChatStore();
   const { onlineUsers } = useAuthStore();
 
   useEffect(() => {
-    getAllContacts();
-  }, [getAllContacts]);
+    getMyChatPartners();
+  }, [getMyChatPartners]);
 
   if (isUsersLoading) return <UsersLoadingSkeleton />;
-  // if (true) return <NoChatsFound />;
-  if (allContacts.length === 0) return <NoChatsFound />;
+  if (chats.length === 0) return <NoChatsFound />;
 
   return (
     <>
-      {allContacts.map((contact) => (
+      {chats.map((chat) => (
         <div
-          key={contact._id}
+          key={chat._id}
           className="bg-cyan-500/10 p-4 rounded-lg cursor-pointer hover:bg-cyan-500/20 transition-colors"
-          onClick={() => setSelectedUser(contact)}
+          onClick={() => setSelectedUser(chat)}
         >
           <div className="flex items-center gap-3">
             <div
-              className={`avatar ${onlineUsers.includes(contact._id) ? "online" : "offline"}`}
+              className={`avatar ${onlineUsers.includes(chat._id) ? "online" : "offline"}`}
             >
               <div className="size-12 rounded-full">
                 <img
-                  src={contact.profilePic || "/avatar.png"}
-                  alt={contact.fullName}
+                  src={chat.profilePic || "/avatar.png"}
+                  alt={chat.fullName}
                 />
               </div>
             </div>
             <h4 className="text-slate-200 font-medium truncate">
-              {contact.fullName}
+              {chat.fullName}
             </h4>
           </div>
         </div>
       ))}
     </>
   );
-};
-
-export default ContactList;
+}
+export default ChatsList;
