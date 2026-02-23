@@ -85,6 +85,11 @@ export const login = async (req, res) => {
   // Implement login logic here
   const { email, password } = req.body;
 
+  // Basic validation
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password are required" });
+  }
+
   try {
     const user = await User.findOne({ email });
 
@@ -106,13 +111,6 @@ export const login = async (req, res) => {
         profilePic: user.profilePic,
       },
     });
-
-    // Basic validation
-    if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Email and password are required" });
-    }
   } catch (error) {
     console.error("Login error:", error);
     return res.status(500).json({ message: "Server error during login" });
