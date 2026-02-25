@@ -38,14 +38,27 @@ export const useChatStore = create((set, get) => ({
     set({ isUsersLoading: true });
 
     try {
-        const res = await axiosInstance.get("/messages/chats");
-        set({ chats: res.data });
+      const res = await axiosInstance.get("/messages/chats");
+      set({ chats: res.data });
     } catch (error) {
-        console.error("Error fetching chat partners:", error);
-        toast.error("Failed to load chat partners");
-        
+      console.error("Error fetching chat partners:", error);
+      toast.error("Failed to load chat partners");
     } finally {
       set({ isUsersLoading: false });
+    }
+  },
+
+  getMessagesByUserId: async (userId) => {
+    set({ isMessagesLoading: true });
+
+    try {
+      const res = await axiosInstance.get(`/messages/${userId}`);
+      set({ messages: res.data });
+    } catch (error) {
+      console.log("Error in get message by id");
+      toast.error(error.response?.data?.message || "Failed to load messages");
+    } finally {
+      set({ isMessagesLoading: false });
     }
   },
 }));

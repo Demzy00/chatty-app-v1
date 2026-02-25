@@ -23,7 +23,7 @@ const ChatPage = () => {
         </div>
 
         {/* RIGHT SIDE */}
-        <div className="flex-1 flex bg-slate-900/50 backdrop-blur-sm">
+        <div className="flex flex-1 flex-col bg-slate-900/50 backdrop-blur-sm">
           {selectedUser ? <ChatContainer /> : <NoConversationPlaceHolder />}
         </div>
       </BorderAnimatedContainer>
