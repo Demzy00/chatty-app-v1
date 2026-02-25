@@ -1,21 +1,26 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
+import { io } from "socket.io-client";
 
-console.log(axiosInstance);
+const BASE_URL =
+  import.meta.env.MODE == "development" ? "http://localhost:5000" : "/";
 
-export const useAuthStore = create((set) => ({
+export const useAuthStore = create((set, get) => ({
   authUser: null,
   isCheckingAuth: true,
   isSigningUp: false,
   isLogging: false,
   isUpdatingProfile: false,
   onlineUsers: [],
+  socket: null,
+  onlineUsers: [],
 
   checkAuth: async () => {
     try {
       const res = await axiosInstance.get("/auth/check");
       set({ authUser: res.data.user });
+      get().connectSocket();
     } catch (error) {
       console.log("Error in authCheck:", error);
       set({ authUser: null });
@@ -33,6 +38,7 @@ export const useAuthStore = create((set) => ({
 
       //
       toast.success("Signup successful! Welcome to Chatty App.");
+      get().connectSocket();
     } catch (error) {
       toast.error(error.response.data.message || "Failed to signup");
     } finally {
@@ -45,6 +51,8 @@ export const useAuthStore = create((set) => ({
       const res = await axiosInstance.post("/auth/login", data);
       set({ authUser: res.data.user });
       toast.success("Login successful! Welcome back to Chatty App.");
+
+      get().connectSocket();
     } catch (error) {
       console.log(error);
       toast.error(error.response?.data?.message || "Failed to login");
@@ -58,6 +66,7 @@ export const useAuthStore = create((set) => ({
       await axiosInstance.post("/auth/logout");
       set({ authUser: null });
       toast.success("Logged out successfully!");
+      get().disconnectSocket();
     } catch (error) {
       toast.error("Failed to logout. Please try again.");
       console.log("Logout error:", error);
@@ -75,6 +84,35 @@ export const useAuthStore = create((set) => ({
       toast.error(error.response?.data?.message || "Failed to update profile");
     } finally {
       set({ isUpdatingProfile: false });
+    }
+  },
+
+  connectSocket: () => {
+    const { authUser } = get();
+
+    console.log(get());
+
+    if (!authUser || get().socket?.connected) return;
+
+    const socket = io(BASE_URL, {
+      withCredentials: true, // this ensures cookies are sent with the connection
+      // query: {
+      //   userId: authUser._id,
+      // },
+    });
+
+    set({ socket });
+
+    // listen for online event
+    socket.on("getOnlineUsers", (userIds) => {
+      set({ onlineUsers: userIds });
+    });
+  },
+
+  disconnectSocket: () => {
+    if (get().socket.connected) {
+      get().socket.disconnect();
+      set({ socket: null });
     }
   },
 }));
